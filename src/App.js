@@ -84,6 +84,10 @@ class App extends React.Component {
   }
 
   componentDidMount() {
+    this.resetGame();
+  };
+
+  resetGame = () => {
     const initialDeck = shuffleDeck([...deckInicial]);
     this.setState({ shuffledDeck: initialDeck });
 
@@ -96,7 +100,7 @@ class App extends React.Component {
     const initialDealerCards = [initialDeck.pop(), { name: 'back.png', value: 0 }];
     this.setState({ dealerCards: initialDealerCards });
     this.calculateDealerScore(initialDealerCards);
-  }
+  };
 
   handleHit = () => {
     const card = this.state.shuffledDeck.pop();
@@ -162,6 +166,7 @@ class App extends React.Component {
     return (
       <div>
         <div>
+          <button onClick={this.resetGame}>Reiniciar</button>
           <div>
             <h2>Dealer Score: {this.state.dealerScore}</h2>
             {this.state.dealerCards.map((card, index) => (
