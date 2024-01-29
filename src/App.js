@@ -1,4 +1,3 @@
-// App.js
 import React, { useState, useEffect } from 'react';
 
 const deckInicial = [
@@ -70,15 +69,14 @@ function shuffleDeck(deck) {
   return shuffledDeck;
 }
 
-// Baraja el deck al comienzo
-const shuffledDeck = shuffleDeck(deckInicial);
-
 const App = () => {
   const [playerCards, setPlayerCards] = useState([]);
   const [dealerCards, setDealerCards] = useState([]);
   const [hitCard, setHitCard] = useState([]);
   const [showDealerFirstCard, setShowDealerFirstCard] = useState(false);
   const [shuffledDeck, setShuffledDeck] = useState([]);
+  const [playerScore, setPlayerScore] = useState(0);
+  const [dealerScore, setDealerScore] = useState(0);
 
   useEffect(() => {
     const initialDeck = shuffleDeck([...deckInicial]);
@@ -87,39 +85,73 @@ const App = () => {
     //Hace pop de la baraja para el jugador
     const initialPlayerCards = [initialDeck.pop()];
     setPlayerCards(initialPlayerCards);
+    calculatePlayerScore(initialPlayerCards);
 
     // Hace pop de la baraja para otra carta para el dealer y mete una oculta con valor 0
     const initialDealerCards = [initialDeck.pop(), { name: 'back.png', value: 0 }];
     setDealerCards(initialDealerCards);
+    calculateDealerScore(initialDealerCards);
   }, []);
 
   const handleHit = () => {
     const card = shuffledDeck.pop();
     setHitCard(card);
     setPlayerCards([...playerCards, card]);
+    calculatePlayerScore([...playerCards, card]);
+  };
+
+  const handleDealerHit = () => {
+    let dealerHand = [...dealerCards];
+    const card = shuffledDeck.pop();
+
+    // Si la carta oculta aún está en la mano del dealer, añade la nueva carta
+    if (dealerHand.some(card => card.value === 0)) {
+      dealerHand = [...dealerHand, card];
+    } else {
+      dealerHand = [...dealerHand, card];
+    }
+
+    setDealerCards(dealerHand);
+    calculateDealerScore(dealerHand);
   };
 
   const handleStand = () => {
     setShowDealerFirstCard(true);
-
-    // Draw cards for the dealer until the sum is 17 or higher
     let dealerHand = [...dealerCards];
+    // Remove the hidden card from the dealer's hand
+    if (dealerHand.some(card => card.value === 0)) {
+      dealerHand = dealerHand.slice(0, 1).concat(dealerHand.slice(2));
+      const card = shuffledDeck.pop();
+      dealerHand = [...dealerHand, card];
+    }
+    // Draw cards for the dealer until the sum is 17 or higher
     while (calculateScore(dealerHand) < 17) {
       const card = shuffledDeck.pop();
       dealerHand = [...dealerHand, card];
     }
-
-    // Remove the hidden card from the dealer's hand
-    dealerHand = dealerHand.slice(0, 1).concat(dealerHand.slice(2));
     setDealerCards(dealerHand);
+    calculateDealerScore(dealerHand);
   };
 
   const calculateScore = (cards) => {
     return cards.reduce((total, card) => total + card.value, 0);
   };
 
-  const playerScore = calculateScore(playerCards);
-  const dealerScore = calculateScore(dealerCards);
+  const calculatePlayerScore = (cards) => {
+    const score = calculateScore(cards);
+    setPlayerScore(score);
+    if (score > 21) {
+      alert('Player Busted');
+    }
+  };
+
+  const calculateDealerScore = (cards) => {
+    const score = calculateScore(cards);
+    setDealerScore(score);
+    if (score > 21) {
+      alert('Dealer Busted');
+    }
+  };
 
   return (
     <div>
@@ -129,15 +161,15 @@ const App = () => {
           {dealerCards.map((card, index) => (
             <img
               key={index}
-              src={`./assets/PNG/${showDealerFirstCard || index === 0 ? card.name : 'back.png'}`}
+              src={`./assets/PNG/${index !== 1 || showDealerFirstCard || card.value !== 0 ? card.name : 'back.png'}`}
               alt={card.name}
               style={{ width: '100px', height: '150px' }} // Establece el ancho y alto fijo
             />
           ))}
-        </div>
-        <div>
-          <button onClick={handleHit}>Hit</button>
-          <button onClick={handleStand}>Stand</button>
+
+          <div>
+            <button onClick={handleDealerHit}>Hit</button>
+          </div>
         </div>
         <div>
           <h2>Player Score: {playerScore}</h2>
@@ -149,6 +181,10 @@ const App = () => {
               style={{ width: '100px', height: '150px' }} // Establece el ancho y alto fijo
             />
           ))}
+          <div>
+            <button onClick={handleHit}>Hit</button>
+            <button onClick={handleStand}>Stand</button>
+          </div>
         </div>
       </div>
     </div>
