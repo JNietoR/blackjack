@@ -1,4 +1,5 @@
 import React from 'react';
+import './input.css';
 
 const deckInicial = [
   { name: "2_of_hearts.png", value: 2 },
@@ -79,7 +80,8 @@ class App extends React.Component {
       showDealerFirstCard: false,
       shuffledDeck: [],
       playerScore: 0,
-      dealerScore: 0
+      dealerScore: 0,
+      showReset:false,
     };
   }
 
@@ -88,6 +90,7 @@ class App extends React.Component {
   };
 
   resetGame = () => {
+    const showReset = false;
     const initialDeck = shuffleDeck([...deckInicial]);
     this.setState({ shuffledDeck: initialDeck });
 
@@ -127,13 +130,13 @@ class App extends React.Component {
   handleStand = () => {
     this.setState({ showDealerFirstCard: true });
     let dealerHand = [...this.state.dealerCards];
-    // Remove the hidden card from the dealer's hand
+    // elimina la carta oculta del dealer y agrega una en su lugar con valor ya que la oculta vale 0
     if (dealerHand.some(card => card.value === 0)) {
       dealerHand = dealerHand.slice(0, 1).concat(dealerHand.slice(2));
       const card = this.state.shuffledDeck.pop();
       dealerHand = [...dealerHand, card];
     }
-    // Draw cards for the dealer until the sum is 17 or higher
+    // Roba cartas mientras el score del dealer sea inferior a 17
     while (this.calculateScore(dealerHand) < 17) {
       const card = this.state.shuffledDeck.pop();
       dealerHand = [...dealerHand, card];
@@ -151,6 +154,7 @@ class App extends React.Component {
     this.setState({ playerScore: score });
     if (score > 21) {
       alert('Player Busted');
+      this.setState({showReset:true});
     }
   };
 
@@ -159,42 +163,55 @@ class App extends React.Component {
     this.setState({ dealerScore: score });
     if (score > 21) {
       alert('Dealer Busted');
+      this.setState({showReset:true});
     }
   };
 
   render() {
+    const { showReset } = this.state;
     return (
-      <div>
-        <div>
-          <button onClick={this.resetGame}>Reiniciar</button>
+      
+      <div className="w-3/4 m-auto mt-8">
+        <div className="bg-green-600 border-8 rounded border-amber-950 border-double">
+        {showReset && (
+          <button className="focus:outline-none text-white bg-purple-700 hover:bg-purple-800 focus:ring-4 focus:ring-purple-300 font-medium rounded-lg text-sm px-5 py-2.5 m-2 dark:bg-purple-600 dark:hover:bg-purple-700 dark:focus:ring-purple-900" onClick={this.resetGame}>Reiniciar</button>
+        )}
           <div>
-            <h2>Dealer Score: {this.state.dealerScore}</h2>
-            {this.state.dealerCards.map((card, index) => (
-              <img
-                key={index}
-                src={`./assets/PNG/${index !== 1 || this.state.showDealerFirstCard || card.value !== 0 ? card.name : 'back.png'}`}
-                alt={card.name}
-                style={{ width: '100px', height: '150px' }} // Establece el ancho y alto fijo
-              />
-            ))}
+            <h2 className="text-center font-bold">Dealer Score: {this.state.dealerScore}</h2>
+            <div className="flex flex-row justify-center">
+              {this.state.dealerCards.map((card, index) => (
+                <img 
+                  className="m-2"
+                  key={index}
+                  src={`./assets/PNG/${index !== 1 || this.state.showDealerFirstCard || card.value !== 0 ? card.name : 'back.png'}`}
+                  alt={card.name}
+                  style={{ width: '100px', height: '150px' }} // Establece el ancho y alto fijo
+                />
+              ))}
+            </div>
 
-            <div>
-              <button onClick={this.handleDealerHit}>Hit</button>
+
+            <div className="flex justify-center">
+              <button className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 m-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800" onClick={this.handleDealerHit}>Hit</button>
             </div>
           </div>
           <div>
-            <h2>Player Score: {this.state.playerScore}</h2>
-            {this.state.playerCards.map((card, index) => (
-              <img
-                key={index}
-                src={`./assets/PNG/${card.name}`}
-                alt={card.name}
-                style={{ width: '100px', height: '150px' }} // Establece el ancho y alto fijo
-              />
-            ))}
-            <div>
-              <button onClick={this.handleHit}>Hit</button>
-              <button onClick={this.handleStand}>Stand</button>
+            <h2 className="text-center font-bold">Player Score: {this.state.playerScore}</h2>
+            <div className="flex flex-row justify-center">
+              {this.state.playerCards.map((card, index) => (
+                <img 
+                  className="m-2"
+                  key={index}
+                  src={`./assets/PNG/${card.name}`}
+                  alt={card.name}
+                  style={{ width: '100px', height: '150px' }} // Establece el ancho y alto fijo
+                />
+              ))}
+            </div>
+
+            <div className="flex justify-center">
+              <button className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 m-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800" onClick={this.handleHit}>Hit</button>
+              <button className='focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 m-2 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900' onClick={this.handleStand}>Stand</button>
             </div>
           </div>
         </div>
