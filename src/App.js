@@ -1,6 +1,8 @@
 import React from 'react';
 import './input.css';
+import './App.css';
 
+// Array que representa una baraja de cartas con nombres y valores
 const deckInicial = [
   { name: "2_of_hearts.png", value: 2 },
   { name: "3_of_hearts.png", value: 3 },
@@ -56,8 +58,9 @@ const deckInicial = [
   { name: "ace_of_spades.png", value: 11 }
 ];
 
+// Función para barajar la baraja usando el algoritmo de barajado Fisher-Yates
 function shuffleDeck(deck) {
-  // Create a copy of the original array to avoid modifying the original array
+  // Crea una copia del deck para evitar perder el deck original
   const shuffledDeck = [...deck];
 
   // Fisher-Yates shuffle algorithm
@@ -70,6 +73,7 @@ function shuffleDeck(deck) {
   return shuffledDeck;
 }
 
+// Constructor para inicializar el estado del componente
 class App extends React.Component {
   constructor(props) {
     super(props);
@@ -81,30 +85,33 @@ class App extends React.Component {
       shuffledDeck: [],
       playerScore: 0,
       dealerScore: 0,
-      showReset:false,
+      showReset: false,
     };
   }
 
+  // Método del ciclo de vida para reiniciar el juego cuando el componente se monta
   componentDidMount() {
     this.resetGame();
   };
 
+  // Función para restablecer el estado del juego
   resetGame = () => {
-    const showReset = false;
+    this.setState({ showReset: false });
     const initialDeck = shuffleDeck([...deckInicial]);
     this.setState({ shuffledDeck: initialDeck });
 
-    // Hace pop de la baraja para el jugador
+    // Hace pop de la baraja para el jugador, establece el estado de las cartas iniciales del jugador y calcula el score inicial segun esta carta
     const initialPlayerCards = [initialDeck.pop()];
     this.setState({ playerCards: initialPlayerCards });
     this.calculatePlayerScore(initialPlayerCards);
 
-    // Hace pop de la baraja para otra carta para el dealer y mete una oculta con valor 0
+    // Roba cartas del dealer una normal(pop) y otra oculta con valor 0 que despues cambiaremos por otra, establece el estado de las cartas iniciales del dealer y calcula el score inicial segun estas cartas
     const initialDealerCards = [initialDeck.pop(), { name: 'back.png', value: 0 }];
     this.setState({ dealerCards: initialDealerCards });
     this.calculateDealerScore(initialDealerCards);
   };
 
+  // Función para manejar cuando el jugador hace clic en el botón "Hit", primero saca una carta luego la agrega a la mano calculando el nuevo estado y calcula la nueva puntuación según estas cartas
   handleHit = () => {
     const card = this.state.shuffledDeck.pop();
     this.setState({ hitCard: card });
@@ -112,25 +119,21 @@ class App extends React.Component {
     this.calculatePlayerScore([...this.state.playerCards, card]);
   };
 
+  // Función para manejar cuando se utiliza el boton hit del crupier, se saca carta se agrega carta a su mano catualizando su estado y luego calculara el nuevo score actualizando su estado
   handleDealerHit = () => {
-    let dealerHand = [...this.state.dealerCards];
     const card = this.state.shuffledDeck.pop();
-
-    // Si la carta oculta aún está en la mano del dealer, añade la nueva carta
-    if (dealerHand.some(card => card.value === 0)) {
-      dealerHand = [...dealerHand, card];
-    } else {
-      dealerHand = [...dealerHand, card];
-    }
-
-    this.setState({ dealerCards: dealerHand });
-    this.calculateDealerScore(dealerHand);
+    this.setState({ hitCard: card });
+    this.setState({ dealerCards: [...this.state.dealerCards, card] });
+    this.calculateDealerScore([...this.state.dealerCards, card]);
   };
 
+  // Función para manejar cuando el jugador hace click en el botón "Stand" y se planta
   handleStand = () => {
+    //Se cambia el estado para que se muestre la carta oculta del dealer
     this.setState({ showDealerFirstCard: true });
+    //copia de la mano del dealer
     let dealerHand = [...this.state.dealerCards];
-    // elimina la carta oculta del dealer y agrega una en su lugar con valor ya que la oculta vale 0
+    // elimina la carta oculta del dealer y agrega una en su lugar con valor ya que la oculta valía 0
     if (dealerHand.some(card => card.value === 0)) {
       dealerHand = dealerHand.slice(0, 1).concat(dealerHand.slice(2));
       const card = this.state.shuffledDeck.pop();
@@ -141,46 +144,88 @@ class App extends React.Component {
       const card = this.state.shuffledDeck.pop();
       dealerHand = [...dealerHand, card];
     }
+    //actualiza la mano del dealer, calcula el score del dealer y muestra el botón de reset al terminar la partida cuando te plantas
     this.setState({ dealerCards: dealerHand });
     this.calculateDealerScore(dealerHand);
+    this.setState({ showReset: true });
   };
 
+  // función para calcular el score de una mano
   calculateScore = (cards) => {
     return cards.reduce((total, card) => total + card.value, 0);
   };
 
+  // Calcula la puntuación del jugador y cambia el estado de la partida si se pasa de 21
   calculatePlayerScore = (cards) => {
     const score = this.calculateScore(cards);
     this.setState({ playerScore: score });
     if (score > 21) {
-      alert('Player Busted');
-      this.setState({showReset:true});
+      this.setState({ showReset: true });
     }
   };
 
+  // Calcula la puntuación del dealer y cambia el estado de la partida si se pasa de 21
   calculateDealerScore = (cards) => {
     const score = this.calculateScore(cards);
     this.setState({ dealerScore: score });
     if (score > 21) {
-      alert('Dealer Busted');
-      this.setState({showReset:true});
+      this.setState({ showReset: true });
     }
   };
 
+  // función para calcular quien gana la partida
+  calculateWinner = () => {
+    if (this.state.playerScore < 21 && this.state.dealerScore > 21) {
+      return "Dealer Busted Player Wins";
+    } else if (this.state.dealerScore < 21 && this.state.playerScore > 21) {
+      return "Player Busted Dealer wins";
+    } else {
+      if (this.state.dealerScore > this.state.playerScore) {
+        return "Dealer Wins";
+      } else {
+        return "Player Wins";
+      }
+    }
+  };
+
+  // Método para renderizar la interfaz del juego
   render() {
+    // Desestructura las propiedades del estado
     const { showReset } = this.state;
+    // Calcula al ganador del juego
+    const winner = this.calculateWinner();
+
     return (
-      
-      <div className="w-3/4 m-auto mt-8">
-        <div className="bg-green-600 border-8 rounded border-amber-950 border-double">
-        {showReset && (
-          <button className="focus:outline-none text-white bg-purple-700 hover:bg-purple-800 focus:ring-4 focus:ring-purple-300 font-medium rounded-lg text-sm px-5 py-2.5 m-2 dark:bg-purple-600 dark:hover:bg-purple-700 dark:focus:ring-purple-900" onClick={this.resetGame}>Reiniciar</button>
-        )}
-          <div>
+      <div className="w-2/4 m-auto my-36">
+
+        {/* Contenedor principal del juego */}
+        <div className="text-center bg-green-600 border-8 rounded-2xl border-amber-950 border-double mesa">
+
+          {/* Sección para mostrar el resultado del juego y el botón de reinicio */}
+          {showReset && (
+            <div className="w-2/4 m-auto mt-8">
+              <div className="text-center bg-green-600 border-8 rounded border-amber-950 border-double">
+                {/* Muestra el mensaje del ganador */}
+                <h2 className="text-center font-bold">{winner}</h2>
+                {/* Botón de reinicio */}
+                <button
+                  className="font-bold focus:outline-none text-white bg-purple-700 hover:bg-purple-800 focus:ring-4 focus:ring-purple-300 rounded-lg text-sm px-5 py-2.5 m-2 dark:bg-purple-600 dark:hover:bg-purple-700 dark:focus:ring-purple-900"
+                  onClick={this.resetGame}
+                >
+                  Reiniciar
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Sección para mostrar la puntuación y las cartas del crupier */}
+          <div className="mt-4">
             <h2 className="text-center font-bold">Dealer Score: {this.state.dealerScore}</h2>
+            
             <div className="flex flex-row justify-center">
+              {/* Mapea y muestra las cartas del crupier */}
               {this.state.dealerCards.map((card, index) => (
-                <img 
+                <img
                   className="m-2"
                   key={index}
                   src={`./assets/PNG/${index !== 1 || this.state.showDealerFirstCard || card.value !== 0 ? card.name : 'back.png'}`}
@@ -190,16 +235,25 @@ class App extends React.Component {
               ))}
             </div>
 
-
+            {/* Botón de "Hit" para el crupier */}
             <div className="flex justify-center">
-              <button className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 m-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800" onClick={this.handleDealerHit}>Hit</button>
+              <button
+                className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-bold rounded-lg text-sm px-5 py-2.5 m-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
+                onClick={this.handleDealerHit}
+              >
+                Hit
+              </button>
             </div>
           </div>
-          <div>
+
+          {/* Sección para mostrar la puntuación y las cartas del jugador */}
+          <div className="mb-4">
             <h2 className="text-center font-bold">Player Score: {this.state.playerScore}</h2>
+            
             <div className="flex flex-row justify-center">
+              {/* Mapea y muestra las cartas del jugador */}
               {this.state.playerCards.map((card, index) => (
-                <img 
+                <img
                   className="m-2"
                   key={index}
                   src={`./assets/PNG/${card.name}`}
@@ -209,15 +263,26 @@ class App extends React.Component {
               ))}
             </div>
 
+            {/* Botones de "Hit" y "Stand" para el jugador */}
             <div className="flex justify-center">
-              <button className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 m-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800" onClick={this.handleHit}>Hit</button>
-              <button className='focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 m-2 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900' onClick={this.handleStand}>Stand</button>
+              <button
+                className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-bold rounded-lg text-sm px-5 py-2.5 m-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
+                onClick={this.handleHit}
+              >
+                Hit
+              </button>
+              <button
+                className='focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-bold rounded-lg text-sm px-5 py-2.5 m-2 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900'
+                onClick={this.handleStand}
+              >
+                Stand
+              </button>
             </div>
+
           </div>
         </div>
       </div>
     );
   }
 }
-
 export default App;
