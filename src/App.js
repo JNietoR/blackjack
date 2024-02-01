@@ -180,7 +180,9 @@ class App extends React.Component {
     } else if (this.state.dealerScore < 21 && this.state.playerScore > 21) {
       return "Player Busted Dealer wins";
     } else {
-      if (this.state.dealerScore > this.state.playerScore) {
+      if (this.state.dealerScore == this.state.playerScore) {
+        return "It's a tie";
+      } else if (this.state.dealerScore > this.state.playerScore) {
         return "Dealer Wins";
       } else {
         return "Player Wins";
@@ -203,7 +205,7 @@ class App extends React.Component {
 
           {/* Sección para mostrar el resultado del juego y el botón de reinicio */}
           {showReset && (
-            <div className="w-2/4 m-auto mt-8">
+            <div className="w-2/4 m-auto mt-8 flex flex-wrap justify-center">
               <div className="text-center bg-green-600 border-8 rounded border-amber-950 border-double">
                 {/* Muestra el mensaje del ganador */}
                 <h2 className="text-center font-bold">{winner}</h2>
@@ -221,8 +223,8 @@ class App extends React.Component {
           {/* Sección para mostrar la puntuación y las cartas del crupier */}
           <div className="mt-4">
             <h2 className="text-center font-bold">Dealer Score: {this.state.dealerScore}</h2>
-            
-            <div className="flex flex-row justify-center">
+
+            <div className="flex flex-row justify-center flex-wrap">
               {/* Mapea y muestra las cartas del crupier */}
               {this.state.dealerCards.map((card, index) => (
                 <img
@@ -249,8 +251,8 @@ class App extends React.Component {
           {/* Sección para mostrar la puntuación y las cartas del jugador */}
           <div className="mb-4">
             <h2 className="text-center font-bold">Player Score: {this.state.playerScore}</h2>
-            
-            <div className="flex flex-row justify-center">
+
+            <div className="flex flex-row justify-center flex-wrap">
               {/* Mapea y muestra las cartas del jugador */}
               {this.state.playerCards.map((card, index) => (
                 <img
