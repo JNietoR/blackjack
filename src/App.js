@@ -206,7 +206,7 @@ class App extends React.Component {
           {/* Sección para mostrar el resultado del juego y el botón de reinicio */}
           {showReset && (
             <div className="m-auto mt-8 flex flex-wrap justify-center">
-              <div className="text-center bg-green-600 border-8 rounded border-amber-950 border-double">
+              <div className="w-2/4 sm:min-w-3/4 text-center bg-green-600 border-8 rounded border-amber-950 border-double">
                 {/* Muestra el mensaje del ganador */}
                 <h2 className="text-center font-bold">{winner}</h2>
                 {/* Botón de reinicio */}
