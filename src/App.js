@@ -180,7 +180,7 @@ class App extends React.Component {
     } else if (this.state.dealerScore < 21 && this.state.playerScore > 21) {
       return "Player Busted Dealer wins";
     } else {
-      if (this.state.dealerScore == this.state.playerScore) {
+      if (this.state.dealerScore === this.state.playerScore) {
         return "It's a tie";
       } else if (this.state.dealerScore > this.state.playerScore) {
         return "Dealer Wins";
