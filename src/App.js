@@ -198,14 +198,14 @@ class App extends React.Component {
     const winner = this.calculateWinner();
 
     return (
-      <div className="w-2/4 m-auto my-36">
+      <div className="lg:w-2/4 m-auto my-36">
 
         {/* Contenedor principal del juego */}
-        <div className="text-center bg-green-600 border-8 rounded-2xl border-amber-950 border-double mesa">
+        <div className="text-center border-8 rounded-2xl border-amber-950 border-double mesa">
 
           {/* Sección para mostrar el resultado del juego y el botón de reinicio */}
           {showReset && (
-            <div className="w-2/4 m-auto mt-8 flex flex-wrap justify-center">
+            <div className="m-auto mt-8 flex flex-wrap justify-center">
               <div className="text-center bg-green-600 border-8 rounded border-amber-950 border-double">
                 {/* Muestra el mensaje del ganador */}
                 <h2 className="text-center font-bold">{winner}</h2>
