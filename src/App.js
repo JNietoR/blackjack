@@ -175,9 +175,9 @@ class App extends React.Component {
 
   // función para calcular quien gana la partida
   calculateWinner = () => {
-    if (this.state.playerScore < 21 && this.state.dealerScore > 21) {
+    if (this.state.playerScore <= 21 && this.state.dealerScore > 21) {
       return "Dealer Busted Player Wins";
-    } else if (this.state.dealerScore < 21 && this.state.playerScore > 21) {
+    } else if (this.state.dealerScore <= 21 && this.state.playerScore > 21) {
       return "Player Busted Dealer wins";
     } else {
       if (this.state.dealerScore === this.state.playerScore) {
